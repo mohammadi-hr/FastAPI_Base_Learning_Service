@@ -33,17 +33,19 @@ class PersonUpdateSchema(PersonBaseSchema):
 
 
 class CostBasicSchema(BaseModel):
-    description: str = Field(min_length=10, max_length=256, pattern="^[A-Za-z0-9.,!?'-_ ]+$",
+    description: str = Field(min_length=10, max_length=256, pattern="[A-Za-z0-9.,!?'-_ ]+",
                              description="description text between 10 to 256 characters, number and punctuatinn only")
-    amount: float
+    amount: float = Field(..., gt=0, lt=10000,
+                          description="amount must be digit greater than 0 and less than 10000")
 
-    @field_serializer('description', mode='plain')
+    @field_serializer('description')
     def serialize(self, v: str) -> str:
         return v.capitalize()
 
     @field_validator('description')
     def validate_text(cls, v: str) -> str:
         value = v.strip()
+
         if len(value) < 10:
             raise ValueError("description must be at least 10 characters long")
         if len(value) > 256:
@@ -51,6 +53,7 @@ class CostBasicSchema(BaseModel):
                 "description should not be more than 256 characters long")
 
         banned_words = ["someword1", "someword2"]
+
         if any(bad_word in value.lower() for bad_word in banned_words):
             raise ValueError("description has forbbiden words")
 
