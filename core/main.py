@@ -78,6 +78,8 @@ def update_person(person_schema: PersonUpdateSchema, person_id: int = Path()):
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                         detail=f'{person_id} not found in the persons list!')
 
+# --------- delete mothod ----------------
+
 
 @app.delete("/users/{id}")
 def person_delete(id: int):
