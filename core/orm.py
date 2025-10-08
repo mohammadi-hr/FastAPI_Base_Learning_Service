@@ -4,22 +4,11 @@ from sqlalchemy.ext.declarative import declarative_base
 from database_test import User, UserGender, UserType
 from datetime import datetime, timedelta
 from sqlalchemy.sql import func, text
-
-SQLAlchemy_SQLite_URI = "sqlite:///./sqlite.db"
-
-engine = create_engine(
-    SQLAlchemy_SQLite_URI,
-    echo=True,  # Log SQL to the console
-    # Allow use across multiple threads
-    connect_args={"check_same_thread": False}  # usre only for sqlite
-)
-
-Session = sessionmaker(autoflush=False, bind=engine)
+from sqlalchemy_conf import *
 
 
 # Retrieve All Data From DB
 
-session = Session()
 users = session.query(User).all()
 # print(users)
 
