@@ -72,6 +72,7 @@ class Comment(Base):
         'Comment', back_populates='children', remote_side=[id])
     children = relationship(
         'Comment', back_populates='parent', remote_side=[parent_id])
+    UniqueConstraint('user_id', 'post_id', 'title', name='unique_post_reply')
 
     def __repr__(self):
         return f"Comment(id: {self.id}, user:{self.user_id}, title: {self.title})"
