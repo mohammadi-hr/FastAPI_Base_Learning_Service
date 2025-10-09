@@ -1,11 +1,34 @@
-from sqlalchemy import create_engine, Column, Integer, String, and_, or_, not_
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-from database_test import User, UserGender, UserType
+from sqlalchemy.sql import func, text, and_, or_, not_
+from database import SessionLocal
 from datetime import datetime, timedelta
-from sqlalchemy.sql import func, text
-from sqlalchemy_conf import *
+from models.user import User
+from models.post import Category
 
+session = SessionLocal()
+
+
+user_ali = session.query(User).filter_by(
+    username='ali_sh').one_or_none()
+print(user_ali.profile.lastname)
+
+
+# retrive posts of user with id=2
+user_id_2 = session.query(User).filter_by(id=2).one_or_none()
+# print(user_id_2.posts)
+post_obj = user_id_2.posts[0]
+print(post_obj.comments[0])
+# session.add(Comment(title='Relationships API',
+#             post_id=post_obj.id, user_id=user_id_2.id, content="In today's post, I will explain how to perform queries on an SQL database using Python. Particularly, I will cover how to query a database with SQLAlchemy"))
+# session.commit()
+parent_comment = post_obj.comments[0]
+# session.add(Comment(title='comment 3', post_id=post_obj.id, user_id=5,
+#             parent_id=parent_comment.id, content="this is a second reply to parent comment"))
+# session.commit()
+
+print(post_obj.comments)
+
+category = session.query(Category).filter_by(title='PHP').one_or_none()
+print(f"posts for {category.title} is {category.posts}")
 
 # Retrieve All Data From DB
 
