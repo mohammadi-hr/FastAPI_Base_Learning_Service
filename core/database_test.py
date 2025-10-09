@@ -6,8 +6,8 @@ from sqlalchemy_conf import *
 from orm_entity_relations import User, UserType
 
 # SQLAlchemy_SQLite_URI = sqlite:///path/:memory
-# SQLAlchemy_MySQL_URI = mysql://user:password@host[:port]/dbname
-# SQLAlchemy_PostgreSQL_URI = postgresql://user:password@host[:port]/dbname
+# engine = create_engine('mysql://username:password@localhost/dbname')
+# engine = create_engine('postgresql://username:password@localhost:5432/dbname')
 
 
 Base.metadata.create_all(engine)

@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, and_, or_, not_, ForeignKey, Enum, Text
+from sqlalchemy import create_engine, Column, Integer, String, and_, or_, not_, ForeignKey, Enum, Text, Table, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
@@ -44,6 +44,41 @@ class UserType(PythonEnum):
     USER = "user"
 
 
+Base.metadata.create_all(engine)
+posts_tags = Table("posts_users", Base.metadata,
+                   Column("id", Integer, primary_key=True, autoincrement=True),
+                   Column("post_id", Integer, ForeignKey('posts.id')),
+                   Column("tag_id", Integer, ForeignKey('tags.id')),
+                   UniqueConstraint('post_id', 'tag_id', name='post_tag_rel')
+                   )
+
+
+class Tag(Base):
+
+    __tablename__ = 'tags'
+
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    title = Column(String(128))
+    description = Column(Text(), nullable=True)
+    posts = relationship('Post', secondary=posts_tags, back_populates='tags')
+
+    def __repr__(self):
+        return f"Tag(id: {self.id}, title: {self.title})"
+
+
+class Category(Base):
+    __tablename__ = 'categories'
+
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    parent_id = Column(Integer(), ForeignKey('categories.id'), nullable=True)
+    title = Column(String(128))
+    description = Column(Text(), nullable=True)
+    posts = relationship('Post', backref='category')
+
+    def __repr__(self):
+        return f"Category(id: {self.id}, title: {self.title})"
+
+
 class Post(Base):
 
     __tablename__ = 'posts'
@@ -56,6 +91,7 @@ class Post(Base):
     created_at = Column(DateTime, default=datetime.now())
     update_at = Column(DateTime, default=datetime.now(),
                        onupdate=datetime.now())
+    tags = relationship('Tag', secondary=posts_tags, back_populates='posts')
 
     def __repr__(self):
         return f"Post(id: {self.id}, title:{self.title})"
@@ -120,7 +156,6 @@ class Profile(Base):
     update_at = Column(DateTime(), default=datetime.now())
 
 
-Base.metadata.create_all(engine)
 addr_1 = Address(user_id=2, city='اراک',
                  address_detail="میدان امام خمینی ، منطقه سر دشت", postal_code='8945134')
 addr_2 = Address(user_id=3, city='تهران',
@@ -164,28 +199,15 @@ profiles = [profile_01, profile_02, profile_03, profile_04, profile_05]
 # session.commit()
 
 
-class Category(Base):
-    __tablename__ = 'categories'
-
-    id = Column(Integer, autoincrement=True, primary_key=True)
-    parent_id = Column(Integer(), ForeignKey('categories.id'), nullable=True)
-    title = Column(String(128))
-    description = Column(Text(), nullable=True)
-
-    def __repr__(self):
-        return f"Category(id: {self.id}, title: {self.content})"
-
-
-Base.metadata.create_all(engine)
 session = Session()
 post_01 = Post(id=1, user_id=3, title='ORM Quick Start', category_id=4, content="Other arguments that are transferrable include the relationship.secondary parameter that refers to a many-to-many association table, as well as the “join” arguments relationship.primaryjoin and relationship.secondaryjoin; “backref” is smart enough to know that these two arguments should also be “reversed” when generating the opposite side.")
 post_02 = Post(id=2, user_id=3, title='ORM Mapped Class Configuration', category_id=4,
                content="Other arguments that are transferrable include the relationship.secondary parameter that refers to a many-to-many association table, as well as the “join” arguments relationship.primaryjoin and relationship.secondaryjoin; “backref” is smart enough to know that these two arguments should also be “reversed” when generating the opposite side.")
-post_03 = Post(id=3, user_id=1, title='Basic Relationship Patterns', category_id=4,
+post_03 = Post(id=3, user_id=1, title='Basic Relationship Patterns', category_id=3,
                content="Other arguments that are transferrable include the relationship.secondary parameter that refers to a many-to-many association table, as well as the “join” arguments relationship.primaryjoin and relationship.secondaryjoin; “backref” is smart enough to know that these two arguments should also be “reversed” when generating the opposite side.")
-post_04 = Post(id=4, user_id=2, title='Adjacency List Relationships', category_id=4,
+post_04 = Post(id=4, user_id=2, title='Adjacency List Relationships', category_id=3,
                content="Other arguments that are transferrable include the relationship.secondary parameter that refers to a many-to-many association table, as well as the “join” arguments relationship.primaryjoin and relationship.secondaryjoin; “backref” is smart enough to know that these two arguments should also be “reversed” when generating the opposite side.")
-post_05 = Post(id=5, user_id=5, title='Configuring how Relationship Joins', category_id=4,
+post_05 = Post(id=5, user_id=5, title='Configuring how Relationship Joins', category_id=2,
                content="Other arguments that are transferrable include the relationship.secondary parameter that refers to a many-to-many association table, as well as the “join” arguments relationship.primaryjoin and relationship.secondaryjoin; “backref” is smart enough to know that these two arguments should also be “reversed” when generating the opposite side.")
 
 insert_posts = [post_01, post_02, post_03, post_04, post_05]
@@ -207,3 +229,20 @@ parent_comment = post_obj.comments[0]
 # session.commit()
 
 print(post_obj.comments)
+
+category_01 = Category(
+    title='SQLAlchemy', description="ORM module for FastAPI")
+category_02 = Category(
+    title='Python', description="open source backend program")
+category_03 = Category(title='PHP', description="web backend program")
+category_04 = Category(
+    title='Starlette', description="is a ASGS python framework ")
+category_05 = Category(
+    title='Pydamic', description="is a library for data model validation in fastapi")
+category_list = [category_01, category_02,
+                 category_03, category_04, category_05]
+# session.add_all(category_list)
+# session.commit()
+
+category = session.query(Category).filter_by(title='PHP').one_or_none()
+print(f"posts for {category.title} is {category.posts}")
