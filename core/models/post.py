@@ -1,9 +1,9 @@
-from core.database import Base
+from database import Base
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, UniqueConstraint, Text, Table
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
-posts_tags = Table("posts_users", Base.metadata,
+posts_tags = Table("posts_tags", Base.metadata,
                    Column("id", Integer, primary_key=True, autoincrement=True),
                    Column("post_id", Integer, ForeignKey('posts.id')),
                    Column("tag_id", Integer, ForeignKey('tags.id')),
@@ -17,7 +17,7 @@ class Tag(Base):
 
     id = Column(Integer, autoincrement=True, primary_key=True)
     title = Column(String(128))
-    description = Column(Text(), nullable=True)
+    description = Column(Text, nullable=True)
     posts = relationship('Post', secondary=posts_tags, back_populates='tags')
 
     def __repr__(self):
@@ -30,7 +30,7 @@ class Category(Base):
     id = Column(Integer, autoincrement=True, primary_key=True)
     parent_id = Column(Integer(), ForeignKey('categories.id'), nullable=True)
     title = Column(String(128))
-    description = Column(Text(), nullable=True)
+    description = Column(Text, nullable=True)
     posts = relationship('Post', backref='category')
 
     def __repr__(self):
@@ -41,11 +41,11 @@ class Post(Base):
 
     __tablename__ = 'posts'
 
-    id = Column(Integer(), primary_key=True, autoincrement=True)
-    user_id = Column(Integer(), ForeignKey('users.id'))
-    category_id = Column(Integer(), ForeignKey('categories.id'))
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    category_id = Column(Integer, ForeignKey('categories.id'))
     title = Column(String(64))
-    content = Column(Text())
+    content = Column(Text)
     created_at = Column(DateTime, default=datetime.now())
     update_at = Column(DateTime, default=datetime.now(),
                        onupdate=datetime.now())
