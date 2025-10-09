@@ -1,5 +1,5 @@
 from database import Base
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from sqlalchemy.orm import relationship
 from enum import Enum as PythonEnum
 from datetime import datetime
@@ -16,6 +16,7 @@ class Person(Base):
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(),
                         onupdate=datetime.now(), nullable=True)
+    is_active = Column(Boolean, default=True)
 
     def __repr__(self):
         return f"Person(id: {self.id}, firstname: {self.firstname}, lastname: {self.lastname})"

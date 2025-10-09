@@ -67,7 +67,7 @@ def retrive_person(person_id: int = Path(description='search in persons list by 
 @app.post("/users", status_code=status.HTTP_201_CREATED, response_model=Annotated[PersonResposeSchema, Body(embed=True)])
 def create_person(person: PersonCreateSchema, db: Session = Depends(get_db)):
     new_person = Person(
-        firstname=person.firstname, lastname=person.lastname, national_code=person.national_code)
+        firstname=person.firstname, lastname=person.lastname, national_code=person.national_code, is_active=person.is_active)
     db.add(new_person)
     db.commit()
     db.refresh(new_person)
@@ -106,6 +106,7 @@ def update_person(person: PersonUpdateSchema, person_id: int = Path(), db: Sessi
         fetch_person_to_update.firstname = person.firstname
         fetch_person_to_update.lastname = person.lastname
         fetch_person_to_update.national_code = person.national_code
+        fetch_person_to_update.is_active = person.is_active
 
         db.commit()
         db.refresh(fetch_person_to_update)
